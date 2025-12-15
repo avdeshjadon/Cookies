@@ -1,10 +1,8 @@
-// Get current active tab
 async function getCurrentTab() {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     return tabs[0];
 }
 
-// Extract domain from URL
 function getDomain(url) {
     try {
         const urlObj = new URL(url);
@@ -14,7 +12,6 @@ function getDomain(url) {
     }
 }
 
-// Format cookies for display
 function formatCookies(cookies) {
     if (!cookies || cookies.length === 0) {
         return '';
@@ -25,7 +22,6 @@ function formatCookies(cookies) {
     }).join('; ');
 }
 
-// Copy text to clipboard
 async function copyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);
@@ -36,7 +32,6 @@ async function copyToClipboard(text) {
     }
 }
 
-// Show status message
 function showStatus(message, type = 'info') {
     const statusEl = document.getElementById('status');
     statusEl.textContent = message;
@@ -48,7 +43,6 @@ function showStatus(message, type = 'info') {
     }, 2000);
 }
 
-// Parse cookie string
 function parseCookieString(cookieStr) {
     const cookies = [];
     const pairs = cookieStr.split(';');
@@ -71,7 +65,6 @@ function parseCookieString(cookieStr) {
     return cookies;
 }
 
-// Insert cookies into browser
 async function insertCookies(cookiesStr, url) {
     const cookies = parseCookieString(cookiesStr);
     if (cookies.length === 0) {
@@ -105,7 +98,6 @@ async function insertCookies(cookiesStr, url) {
     };
 }
 
-// Render cookies list
 function renderCookies(cookies) {
     const listEl = document.getElementById('cookiesList');
     listEl.innerHTML = '';
@@ -151,23 +143,19 @@ function renderCookies(cookies) {
     });
 }
 
-// Initialize popup
 document.addEventListener('DOMContentLoaded', async () => {
     const tab = await getCurrentTab();
     const domain = getDomain(tab.url);
     
     document.getElementById('domain').textContent = domain || 'unknown';
     
-    // Get all cookies for this domain
     if (domain) {
         try {
             const cookies = await chrome.cookies.getAll({ url: tab.url });
             document.getElementById('count').textContent = cookies.length;
             
-            // Store cookies in popup for later use
             window.currentCookies = cookies;
             
-            // Render cookies list
             renderCookies(cookies);
         } catch (err) {
             console.error('Error getting cookies:', err);
@@ -177,7 +165,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Copy all cookies button
 document.getElementById('copyAllBtn').addEventListener('click', async () => {
     if (!window.currentCookies || window.currentCookies.length === 0) {
         showStatus('No cookies', 'error');
@@ -194,7 +181,6 @@ document.getElementById('copyAllBtn').addEventListener('click', async () => {
     }
 });
 
-// Toggle insert panel
 document.getElementById('insertToggle').addEventListener('click', () => {
     const panel = document.getElementById('insertPanel');
     const toggleBtn = document.getElementById('insertToggle');
@@ -207,7 +193,6 @@ document.getElementById('insertToggle').addEventListener('click', () => {
     }
 });
 
-// Insert cookies button
 document.getElementById('insertBtn').addEventListener('click', async () => {
     const cookiesStr = document.getElementById('cookiesInput').value.trim();
     
@@ -222,12 +207,10 @@ document.getElementById('insertBtn').addEventListener('click', async () => {
     if (result.success) {
         showStatus(result.message, 'success');
         
-        // Clear input and close panel
         document.getElementById('cookiesInput').value = '';
         document.getElementById('insertPanel').classList.add('hidden');
         document.getElementById('insertToggle').classList.remove('active');
         
-        // Refresh cookies list
         setTimeout(async () => {
             const cookies = await chrome.cookies.getAll({ url: tab.url });
             document.getElementById('count').textContent = cookies.length;
@@ -239,7 +222,6 @@ document.getElementById('insertBtn').addEventListener('click', async () => {
     }
 });
 
-// Cancel insert
 document.getElementById('cancelBtn').addEventListener('click', () => {
     document.getElementById('cookiesInput').value = '';
     document.getElementById('insertPanel').classList.add('hidden');
