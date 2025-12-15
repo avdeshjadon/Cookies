@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Get all cookies for this domain
     if (domain) {
         try {
-            const cookies = await chrome.cookies.getAll({ domain: domain });
+            const cookies = await chrome.cookies.getAll({ url: tab.url });
             document.getElementById('count').textContent = `Cookies found: ${cookies.length}`;
             
             // Store cookies in popup for later use
