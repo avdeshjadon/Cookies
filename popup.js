@@ -48,6 +48,63 @@ function showStatus(message, type = 'info') {
     }, 2000);
 }
 
+// Parse cookie string
+function parseCookieString(cookieStr) {
+    const cookies = [];
+    const pairs = cookieStr.split(';');
+    
+    for (let pair of pairs) {
+        pair = pair.trim();
+        if (!pair) continue;
+        
+        const eqIndex = pair.indexOf('=');
+        if (eqIndex === -1) continue;
+        
+        const name = pair.substring(0, eqIndex).trim();
+        const value = pair.substring(eqIndex + 1).trim();
+        
+        if (name) {
+            cookies.push({ name, value });
+        }
+    }
+    
+    return cookies;
+}
+
+// Insert cookies into browser
+async function insertCookies(cookiesStr, url) {
+    const cookies = parseCookieString(cookiesStr);
+    if (cookies.length === 0) {
+        return { success: false, message: 'No valid cookies found' };
+    }
+    
+    const urlObj = new URL(url);
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const cookie of cookies) {
+        try {
+            await chrome.cookies.set({
+                url: url,
+                name: cookie.name,
+                value: cookie.value,
+                domain: urlObj.hostname,
+                path: '/'
+            });
+            successCount++;
+        } catch (err) {
+            console.error(`Failed to set cookie ${cookie.name}:`, err);
+            failCount++;
+        }
+    }
+    
+    return {
+        success: successCount > 0,
+        message: `Inserted ${successCount} cookie${successCount !== 1 ? 's' : ''}${failCount > 0 ? `, ${failCount} failed` : ''}`,
+        count: successCount
+    };
+}
+
 // Render cookies list
 function renderCookies(cookies) {
     const listEl = document.getElementById('cookiesList');
@@ -135,4 +192,56 @@ document.getElementById('copyAllBtn').addEventListener('click', async () => {
     } else {
         showStatus('Failed to copy', 'error');
     }
+});
+
+// Toggle insert panel
+document.getElementById('insertToggle').addEventListener('click', () => {
+    const panel = document.getElementById('insertPanel');
+    const toggleBtn = document.getElementById('insertToggle');
+    
+    panel.classList.toggle('hidden');
+    toggleBtn.classList.toggle('active');
+    
+    if (!panel.classList.contains('hidden')) {
+        document.getElementById('cookiesInput').focus();
+    }
+});
+
+// Insert cookies button
+document.getElementById('insertBtn').addEventListener('click', async () => {
+    const cookiesStr = document.getElementById('cookiesInput').value.trim();
+    
+    if (!cookiesStr) {
+        showStatus('Please paste cookies', 'error');
+        return;
+    }
+    
+    const tab = await getCurrentTab();
+    const result = await insertCookies(cookiesStr, tab.url);
+    
+    if (result.success) {
+        showStatus(result.message, 'success');
+        
+        // Clear input and close panel
+        document.getElementById('cookiesInput').value = '';
+        document.getElementById('insertPanel').classList.add('hidden');
+        document.getElementById('insertToggle').classList.remove('active');
+        
+        // Refresh cookies list
+        setTimeout(async () => {
+            const cookies = await chrome.cookies.getAll({ url: tab.url });
+            document.getElementById('count').textContent = cookies.length;
+            window.currentCookies = cookies;
+            renderCookies(cookies);
+        }, 300);
+    } else {
+        showStatus(result.message, 'error');
+    }
+});
+
+// Cancel insert
+document.getElementById('cancelBtn').addEventListener('click', () => {
+    document.getElementById('cookiesInput').value = '';
+    document.getElementById('insertPanel').classList.add('hidden');
+    document.getElementById('insertToggle').classList.remove('active');
 });

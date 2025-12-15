@@ -10,12 +10,23 @@
     <div class="container">
         <div class="header">
             <h1>Cookies</h1>
-            <span id="count">0</span>
+            <div class="header-right">
+                <button id="insertToggle" class="toggle-btn" title="Insert Cookies">+</button>
+                <span id="count">0</span>
+            </div>
         </div>
         
         <div id="domain" class="domain"></div>
         
         <div id="status" class="status"></div>
+        
+        <div id="insertPanel" class="insert-panel hidden">
+            <textarea id="cookiesInput" placeholder="Paste cookies here (name=value; name2=value2)"></textarea>
+            <div class="insert-actions">
+                <button id="insertBtn" class="btn btn-small">Insert Cookies</button>
+                <button id="cancelBtn" class="btn btn-small btn-secondary">Cancel</button>
+            </div>
+        </div>
         
         <div class="actions">
             <button id="copyAllBtn" class="btn">Copy All</button>
