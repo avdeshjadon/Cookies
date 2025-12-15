@@ -77,17 +77,34 @@ async function insertCookies(cookiesStr, url) {
     
     for (const cookie of cookies) {
         try {
-            await chrome.cookies.set({
+            const cookieDetails = {
                 url: url,
                 name: cookie.name,
                 value: cookie.value,
-                domain: urlObj.hostname,
                 path: '/'
-            });
+            };
+            
+            if (urlObj.protocol === 'https:') {
+                cookieDetails.secure = false;
+            }
+            
+            await chrome.cookies.set(cookieDetails);
             successCount++;
         } catch (err) {
             console.error(`Failed to set cookie ${cookie.name}:`, err);
-            failCount++;
+            
+            try {
+                const fallbackDetails = {
+                    url: url,
+                    name: cookie.name,
+                    value: cookie.value
+                };
+                await chrome.cookies.set(fallbackDetails);
+                successCount++;
+            } catch (fallbackErr) {
+                console.error(`Fallback also failed for ${cookie.name}:`, fallbackErr);
+                failCount++;
+            }
         }
     }
     

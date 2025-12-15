@@ -1,4 +1,4 @@
-# Cookies Extractor
+# Cookies Extractor & Inserter
 
 A Chrome browser extension that allows you to extract, view, copy, and insert cookies from any website with a clean and modern interface.
 
