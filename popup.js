@@ -42,12 +42,56 @@ function showStatus(message, type = 'info') {
     statusEl.textContent = message;
     statusEl.className = 'status ' + type;
     
-    if (type !== 'info') {
-        setTimeout(() => {
-            statusEl.textContent = '';
-            statusEl.className = 'status';
-        }, 3000);
+    setTimeout(() => {
+        statusEl.textContent = '';
+        statusEl.className = 'status';
+    }, 2000);
+}
+
+// Render cookies list
+function renderCookies(cookies) {
+    const listEl = document.getElementById('cookiesList');
+    listEl.innerHTML = '';
+    
+    if (!cookies || cookies.length === 0) {
+        listEl.innerHTML = '<div style="font-size: 11px; color: #666; text-align: center;">No cookies found</div>';
+        return;
     }
+    
+    cookies.forEach((cookie) => {
+        const item = document.createElement('div');
+        item.className = 'cookie-item';
+        
+        const info = document.createElement('div');
+        info.className = 'cookie-info';
+        
+        const name = document.createElement('div');
+        name.className = 'cookie-name';
+        name.textContent = cookie.name;
+        
+        const value = document.createElement('div');
+        value.className = 'cookie-value';
+        value.textContent = cookie.value;
+        
+        info.appendChild(name);
+        info.appendChild(value);
+        
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'cookie-copy';
+        copyBtn.textContent = 'Copy';
+        copyBtn.onclick = async () => {
+            const cookieStr = `${cookie.name}=${cookie.value}`;
+            const copied = await copyToClipboard(cookieStr);
+            if (copied) {
+                copyBtn.textContent = '✓';
+                setTimeout(() => copyBtn.textContent = 'Copy', 1500);
+            }
+        };
+        
+        item.appendChild(info);
+        item.appendChild(copyBtn);
+        listEl.appendChild(item);
+    });
 }
 
 // Initialize popup
@@ -55,27 +99,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tab = await getCurrentTab();
     const domain = getDomain(tab.url);
     
-    document.getElementById('domain').textContent = `Domain: ${domain || 'Unknown'}`;
+    document.getElementById('domain').textContent = domain || 'unknown';
     
     // Get all cookies for this domain
     if (domain) {
         try {
             const cookies = await chrome.cookies.getAll({ url: tab.url });
-            document.getElementById('count').textContent = `Cookies found: ${cookies.length}`;
+            document.getElementById('count').textContent = cookies.length;
             
             // Store cookies in popup for later use
             window.currentCookies = cookies;
+            
+            // Render cookies list
+            renderCookies(cookies);
         } catch (err) {
             console.error('Error getting cookies:', err);
-            document.getElementById('count').textContent = 'Cookies found: 0';
+            document.getElementById('count').textContent = '0';
+            renderCookies([]);
         }
     }
 });
 
-// Extract & Copy button
-document.getElementById('extractBtn').addEventListener('click', async () => {
+// Copy all cookies button
+document.getElementById('copyAllBtn').addEventListener('click', async () => {
     if (!window.currentCookies || window.currentCookies.length === 0) {
-        showStatus('No cookies found for this domain', 'error');
+        showStatus('No cookies', 'error');
         return;
     }
     
@@ -83,37 +131,8 @@ document.getElementById('extractBtn').addEventListener('click', async () => {
     const copied = await copyToClipboard(formattedCookies);
     
     if (copied) {
-        showStatus(`✓ Copied ${window.currentCookies.length} cookies to clipboard!`, 'success');
-    } else {
-        showStatus('Failed to copy to clipboard', 'error');
-    }
-});
-
-// View Cookies button
-document.getElementById('viewBtn').addEventListener('click', () => {
-    if (!window.currentCookies || window.currentCookies.length === 0) {
-        showStatus('No cookies found', 'error');
-        return;
-    }
-    
-    const formattedCookies = formatCookies(window.currentCookies);
-    document.getElementById('cookiesText').value = formattedCookies;
-    document.getElementById('cookiesList').classList.remove('hidden');
-});
-
-// Copy from textarea
-document.getElementById('copyBtn').addEventListener('click', async () => {
-    const text = document.getElementById('cookiesText').value;
-    const copied = await copyToClipboard(text);
-    
-    if (copied) {
-        showStatus('✓ Copied to clipboard!', 'success');
+        showStatus(`Copied ${window.currentCookies.length} cookies`, 'success');
     } else {
         showStatus('Failed to copy', 'error');
     }
-});
-
-// Close cookies list
-document.getElementById('closeBtn').addEventListener('click', () => {
-    document.getElementById('cookiesList').classList.add('hidden');
 });

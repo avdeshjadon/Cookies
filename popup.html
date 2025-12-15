@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cookies Extractor</title>
+    <title>Cookies</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <div class="container">
-        <h1>🍪 Cookies Extractor</h1>
-        <div class="info">
-            <p id="domain">Domain: Loading...</p>
-            <p id="count">Cookies found: 0</p>
+        <div class="header">
+            <h1>Cookies</h1>
+            <span id="count">0</span>
         </div>
         
-        <div class="buttons">
-            <button id="extractBtn" class="btn btn-primary">Extract & Copy Cookies</button>
-            <button id="viewBtn" class="btn btn-secondary">View Cookies</button>
-        </div>
+        <div id="domain" class="domain"></div>
         
         <div id="status" class="status"></div>
         
-        <div id="cookiesList" class="cookies-list hidden">
-            <h3>Cookies:</h3>
-            <textarea id="cookiesText" readonly></textarea>
-            <button id="copyBtn" class="btn btn-small">Copy to Clipboard</button>
-            <button id="closeBtn" class="btn btn-small btn-secondary">Close</button>
+        <div class="actions">
+            <button id="copyAllBtn" class="btn">Copy All</button>
         </div>
+        
+        <div id="cookiesList" class="cookies-list"></div>
     </div>
     
     <script src="popup.js"></script>
