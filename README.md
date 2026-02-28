@@ -7,7 +7,6 @@ A Chrome browser extension that allows you to extract, view, copy, and insert co
 - **Extract Cookies**: View all cookies from the current website domain
 - **Copy Individual Cookies**: Copy any single cookie with one click
 - **Copy All Cookies**: Copy all cookies in `name=value; name=value` format
-- **Insert Cookies**: Paste and insert cookies into the current domain
 - **Real-time Count**: Display the total number of cookies found
 - **Modern UI**: Clean, minimalist interface with smooth animations
 - **Privacy Focused**: All operations are performed locally, no data sent to external servers
@@ -36,13 +35,6 @@ A Chrome browser extension that allows you to extract, view, copy, and insert co
 
 - **Copy All**: Click the "COPY ALL" button to copy all cookies in semicolon-separated format
 - **Copy Individual**: Click "Copy" next to any cookie to copy just that cookie
-
-### Inserting Cookies
-
-1. Click the **+** button in the header to open the insert panel
-2. Paste your cookies in the format: `name=value; name2=value2`
-3. Click **Insert Cookies** to add them to the current domain
-4. The cookie list will refresh automatically
 
 ## File Structure
 
@@ -77,11 +69,13 @@ Cookies/
 ## Cookie Format
 
 Cookies are copied in the following format:
+
 ```
 session_id=abc123; user_token=xyz789; preferences=dark_mode
 ```
 
 This format is compatible with:
+
 - HTTP headers (Cookie)
 - JavaScript (document.cookie)
 - API requests
@@ -90,6 +84,7 @@ This format is compatible with:
 ## Security Notes
 
 ⚠️ **Important**: Cookies often contain sensitive information like:
+
 - Session tokens
 - Authentication credentials
 - Personal user data
@@ -119,11 +114,11 @@ See [LICENSE](LICENSE) file for details.
 ## Support
 
 If you encounter issues:
+
 1. Check the Chrome DevTools console for errors
 2. Ensure all files are in the correct directory
 3. Try refreshing the extension in Chrome
 4. Reload the webpage you're trying to extract cookies from
-
 
 ---
 
